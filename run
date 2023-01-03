@@ -1,0 +1,10 @@
+#-*-sh-*-
+
+file=aaa.c
+
+if gcc -lglpk -lm $file; then
+    echo -e "\n\n  compile hoe geche\n\n";
+    ./a.out
+else
+    echo -e "\n\n  hocche na\n\n";
+fi
