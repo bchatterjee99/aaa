@@ -1,10 +1,13 @@
 #-*-sh-*-
 
-file=aaa.c
+file=elimination.c
+file=mult.c
 
-if gcc -lglpk -lm $file; then
+if gcc $file -lgmp -lglpk; then
     echo -e "\n\n  compile hoe geche\n\n";
     ./a.out
 else
     echo -e "\n\n  hocche na\n\n";
 fi
+
+
