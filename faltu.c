@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <glpk.h>
 
-int main(void)
+
+void glp()
 {
     glp_prob *lp;
     int ia[1+1000], ja[1+1000];
@@ -45,6 +46,39 @@ int main(void)
     x3 = glp_get_col_prim(lp, 3);
     printf("\nz = %g; x1 = %g; x2 = %g; x3 = %g\n", z, x1, x2, x3);
     glp_delete_prob(lp);
+}
+
+
+int main(void)
+{
+    FILE* fp1 = fopen("ineq112.txt", "r");
+    FILE* fp2 = fopen("constraint112.txt", "w");
+    int A[112][112];
+    int b[112];
+    int c[112];
+    int  tmp;
+    for(int i=0; i<112; i++)
+    {
+	for(int j=0; j<112; j++)
+	{
+	    fscanf(fp1, "%d", &A[i][j]);
+	    fprintf(fp2, "%d ", A[i][j]);
+	}
+	fprintf(fp2, "\n");
+
+	fscanf(fp1, "%d", &tmp);
+	b[i] = 57 - tmp;
+	c[i] = 72 - tmp;
+    }
+
+    for(int i=0; i<112; i++)
+	fprintf(fp2, "%d ", b[i]);
+    fprintf(fp2, "\n");
+    for(int i=0; i<112; i++)
+	fprintf(fp2, "%d ", c[i]);
+    fprintf(fp2, "\n");
+
+    fclose(fp1);
+    fclose(fp2);
     return 0;
 }
-/* eof */

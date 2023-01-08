@@ -26,7 +26,7 @@ void show_matrix(mpq_t M[][200], int n, int m)
 
 void input1()
 {
-    FILE* fp = fopen("matrix.txt", "r");
+    FILE* fp = fopen("C.txt", "r");
     fscanf(fp, "%d", &n);
     printf("n = %d\n", n);
     int max_digits = 0;
@@ -46,7 +46,7 @@ void input1()
 	    mpq_set(A_copy[i][j], A[i][j]);
 	}
     }
-
+    fclose(fp);
 }
 
 // A[i] <- A[i] / d

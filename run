@@ -1,7 +1,7 @@
 #-*-sh-*-
 
 file=elimination.c
-file=mult.c
+#file=check.c
 
 if gcc $file -lgmp -lglpk; then
     echo -e "\n\n  compile hoe geche\n\n";
