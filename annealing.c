@@ -24,16 +24,23 @@ int Temperature;
 void step(long curr_state[], long next_state[])
 {
     for(int i=0; i<n; i++)
-    {
 	next_state[i] = curr_state[i];
 
+    for(int i=0; i<n; i++)
+    {
         // prob decrease with temperature
-	if((rand() % Max_Temp) <= Temperature)  
+	if((rand() % Max_Temp) <= Temperature/2)
 	{
 	    // +/- [0 .. 5]
-	    next_state[i] = curr_state[i] + (5 - rand()%10);
-	    if(next_state[i] < b[i]) next_state[i] = b[i];
-	    if(next_state[i] > c[i]) next_state[i] = c[i];
+	    /* next_state[i] = curr_state[i] + (5 - rand()%10); */
+	    /* if(next_state[i] < b[i]) next_state[i] = b[i]; */
+	    /* if(next_state[i] > c[i]) next_state[i] = c[i]; */
+
+	    // swap state[i] and state[j]
+	    int j = rand() % n;
+	    long tmp = next_state[i];
+	    next_state[i] = next_state[j];
+	    next_state[j] = tmp;
 	}
     }
 }
