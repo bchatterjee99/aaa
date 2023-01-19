@@ -115,6 +115,15 @@ void show_matrix(long A[][200], int n, char* str)
     }
     printf("\n\n");
 }
+void show_vector(long b[], int n, char* str)
+{
+    printf("%s:\n", str);
+    for(int i=0; i<n; i++)
+    {
+	printf("%d ", b[i]);
+    }
+    printf("\n\n");
+}
 
 void mult_matrix(long A[][200], long B[][200], long C[][200], int n)
 {
@@ -138,8 +147,33 @@ void mult_vector(long A[][200], long b[], long c[], int n)
     }
 }
 
+// returns distance from failed constraints
+int check(long f[], long Constraint[][200], long b[], long c[], int C_n, int C_m)
+{
+    // printf("Check:\n");
+    int dist = 0;
+    for(int i=0; i<C_n; i++)
+    {
+	long tmp = 0;
+	for(int j=0; j<C_m; j++)
+	    tmp = tmp + f[j] * Constraint[i][j];
+	if(tmp < b[i] || tmp > c[i])
+	{
+	    //printf("constraint %d failed\n", i);
+	    //printf("b = %ld, tmp = %ld, c = %ld\n\n", b[i], tmp, c[i]);
+	    if(tmp < b[i])
+		dist = dist + b[i] - tmp;
+	    else
+		dist = dist + tmp - c[i];
+	}
+    }
+    /* if(flag == 0) printf("passed\n"); */
+    /* else printf("failed\n"); */
+    /* printf("\n\n"); */
+    return dist;
+}
 
-void check(long f[], long Constraint[][200], long b[], long c[], int C_n, int C_m)
+void check1(long f[], long Constraint[][200], long b[], long c[], int C_n, int C_m)
 {
     printf("Check:\n");
     int flag = 0;
