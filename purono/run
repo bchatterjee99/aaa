@@ -2,10 +2,10 @@
 
 tput reset
 
-files="annealing.c ilp.c"
+file=annealing.c
 #file=check.c
 
-if gcc $files -lgmp -lglpk; then
+if gcc $file -lgmp -lglpk; then
     echo -e "\n\n  compile hoe geche\n\n";
     ./a.out
 else
