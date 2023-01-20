@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 #include "ilp.h"
 
@@ -18,6 +19,11 @@ long E[200][200];
 #define Start_Temp 100
 int Temperature;
 
+struct energy{
+    double total;
+    double b; // dist from boolean vector
+    double c; // dist from failed constraints
+};
 
 // get next state
 // jump dist. depend on temperature ?
@@ -29,7 +35,7 @@ void step(long curr_state[], long next_state[])
     for(int i=0; i<n; i++)
     {
         // prob decrease with temperature
-	if((rand() % Max_Temp) <= Temperature/2)
+	if((rand() % Max_Temp) <= Temperature/5)
 	{
 	    // +/- [0 .. 5]
 	    /* next_state[i] = curr_state[i] + (5 - rand()%10); */
@@ -80,7 +86,7 @@ double binarize(long state_inv[], long binary[])
 }
 
 // energy of state
-double energy(long state[])
+void energy(long state[], struct energy* e)
 {
     double energy = 0;
 
@@ -92,7 +98,7 @@ double energy(long state[])
 
     // binarize state_inv
     // also get Energy(distance from boolean vector)
-    energy = binarize(state_inv, binary);
+    e->b = binarize(state_inv, binary);
 
     // Energy(distance from failed constraints)
     int dist = check(binary, Constraint, b, c, C_n, C_m);
@@ -101,8 +107,8 @@ double energy(long state[])
 	show_vector(binary, n, "---");
     }
 
-    energy = energy + (double)dist;
-    return energy;
+    e->c = (double)dist;
+    e->total = e->b + e->c;
 }
 
 // reduce temperature
@@ -131,7 +137,7 @@ void copy_state(long source[], long dest[])
 void annealing()
 {
     int itr = 0;
-    double min_energy = 100000000;
+    struct energy min_energy; min_energy.total = 100000000;
     long f1[] = {0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0};
     long curr_state[200];
     long next_state[200];
@@ -152,13 +158,20 @@ void annealing()
     {
 	// get next-state
 	step(curr_state, next_state);
-	double E1 = energy(curr_state);
-	double E2 = energy(next_state);
+	struct energy E1, E2;
+	energy(curr_state, &E1);
+	energy(next_state, &E2);
 
-	min_energy = min1(E1, min_energy);
-	printf("curr-energy: %lf, min-energy-reached: %lf\n", E1, min_energy);
+	// min_energy = min1(E1, min_energy);
+	if(min_energy.total >= E1.total)
+	{
+	    min_energy.total = E1.total;
+	    min_energy.b = E1.b;
+	    min_energy.c = E1.c;
+	}
+	printf("curr-energy: %lf, min-energy-reached: %lf (%lf, %lf)\n", E1.total, min_energy.total, min_energy.b, min_energy.c);
 
-	int p = prob(E1, E2); // jump prob
+	int p = prob(E1.total, E2.total); // jump prob
 	if(rand() % 100 <= p) // jump
 	{
 	    copy_state(next_state, curr_state);
@@ -179,25 +192,26 @@ void test()
     Temperature = Start_Temp;
     long curr_state[200];
     long next_state[200];
+    struct energy E1, E2, E3;
 
     mult_vector(C, f1, curr_state, n);
-    double E1 = energy(curr_state);
+    energy(curr_state, &E1);
     show_vector(curr_state, n, "start-state");
     printf("start energy: %lf\n\n\n", E1);
 
     step(curr_state, curr_state);
-    double E2 = energy(curr_state);
+    energy(curr_state, &E2);
     show_vector(curr_state, n, "curr-state");
     printf("curr-state energy: %lf\n\n\n", E2);
 
     step(curr_state, next_state);
-    double E3 = energy(next_state);
+    energy(next_state, &E3);
     show_vector(next_state, n, "next-state");
     printf("next-state energy: %lf\n\n\n", E3);
 
-    double p1 = prob(E2, E3);
+    double p1 = prob(E2.total, E3.total);
     printf("prob(E2, E3): %lf\n", p1);
-    double p2 = prob(E3, E2);
+    double p2 = prob(E3.total, E2.total);
     printf("prob(E3, E2): %lf\n", p2);
 
     printf("\n\n");
@@ -206,6 +220,7 @@ void test()
 // C-inverse = 1/INV_DIV * D
 int main()
 {
+    srand(time(0));
     input_matrix(C, "C.txt", &n);
     input_matrix(D, "D.txt", &n);
     input_constraint(Constraint, b, c, "constraint115.txt", &C_n, &C_m);
